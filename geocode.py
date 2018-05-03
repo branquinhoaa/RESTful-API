@@ -19,18 +19,13 @@ def getGeocodeLocation(nameOfThePlace):
 
 def findARestaurant(mealType, location):
 	lat, longit = getGeocodeLocation(location)
-	place = getAPlace(lat, longit, mealType)
+	first_place = getAPlace(lat, longit, mealType)[0]
+	venue_id = first_place["id"]
 	response = {}
-	response["name"] = place["name"]
-	response["address"] = place["location"]["formattedAddress"]
-	
-	try:
-		response["image"] = place["categories"][0]["icon"]["prefix"] + place["categories"][0]["icon"]["suffix"]  
-	except:
-		response["image"] = "default.jpg" 
-	
+	response["name"] = first_place["name"]
+	response["address"] = first_place["location"]["formattedAddress"]
+	response["image"] = getFourSquarePhoto(venue_id)
 	return response
-
 
 
 def getAPlace(lat, longit, mealType):
@@ -39,4 +34,20 @@ def getAPlace(lat, longit, mealType):
 	http = httplib2.Http()
 	response, content = http.request(url, 'GET')
 	result = json.loads(content)
-	return result["response"]["venues"][0]
+	return result["response"]["venues"]
+
+
+def getFourSquarePhoto(venue_id):
+	fourSquare_id, fourSquare_secret=env.getForsquareIdAndSecret()
+	photo_size = '300x300'
+	url = ('https://api.foursquare.com/v2/venues/%s/photos?client_secret=%s&client_id=%s&v=20180323'%(venue_id, fourSquare_secret, fourSquare_id))
+
+	http = httplib2.Http()
+	response, content = http.request(url, 'GET')
+
+	# the content returns a list of pictures, but I just want the first one
+	content = json.loads(content)
+	first_pic = content["response"]["photos"]["items"][0]
+	pic_url = first_pic["prefix"]+ photo_size + first_pic["suffix"]
+
+	return pic_url
