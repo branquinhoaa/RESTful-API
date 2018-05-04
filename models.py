@@ -15,7 +15,6 @@ class Restaurant(Base):
     @property
     def serialize(self):
     	return {
-    		'id': self.id,
     		'name': self.name,
     		'address': self.address,
             'image': self.image
