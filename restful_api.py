@@ -30,7 +30,6 @@ def restaurant(id):
 	if request.method == 'GET':
 		return getARestaurant(id)
 	if request.method == 'PUT':
-		print(request.args)
 		name = request.args.get('name', '')
 		address = request.args.get('address', '')
 		image = request.args.get('image', '')
@@ -69,12 +68,10 @@ def getARestaurant(id):
 	restaurant = session.query(Restaurant).filter_by(id=id).one()
 	if not restaurant:
 		print("no restaurant")
-
 	return jsonify(Restaurant=restaurant.serialize)
 
 def updateRestaurant(id, name, address, image):
 	restaurant = session.query(Restaurant).filter_by(id=id).one()
-	print(restaurant)
 	if name:
 		restaurant.name = name
 	if address:
