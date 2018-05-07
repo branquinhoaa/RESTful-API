@@ -21,16 +21,22 @@ def allRestaurants():
 	if request.method == 'GET':
 		return getAllRestaurants()
 	if request.method == 'POST':
-		createARestaurant()
+		location = request.args.get("location")
+		mealtype = request.args.get("mealtype")
+		return createARestaurant(location, mealtype)
 
-@app.route("/restaurant/<int:id>", methods=['GET', 'PUT', 'DELETE'])
-def restaurant():
+@app.route("/restaurants/<int:id>", methods=['GET', 'PUT', 'DELETE'])
+def restaurant(id):
 	if request.method == 'GET':
-		getARestaurant(id)
+		return getARestaurant(id)
 	if request.method == 'PUT':
-		updateRestaurant(id)
+		print(request.args)
+		name = request.args.get('name', '')
+		address = request.args.get('address', '')
+		image = request.args.get('image', '')
+		return updateRestaurant(id, name, address, image)
 	if request.method == 'DELETE':
-		deleteRestaurant(id)
+		return deleteRestaurant(id)
 
 
 # Generate methods to call - first endpoint
@@ -44,25 +50,47 @@ def createARestaurant(location, mealtype):
 	# Here I use my api findARestaurant to return the first restaurant
 	# it will return name, address and image
 	indication = find(mealtype, location)
+	if type(indication) is not dict:
+		return jsonify("no restaurant found")
+	else:
+		loc = ", ".join(indication["address"])
 
-	# store the restaurant in the database
-	restaurant = Restaurant(name = indication["name"], address=indication["address"], image=indication["image"])
-	session.add(restaurant)
-	session.commit()
+		# store the restaurant in the database
+		restaurant = Restaurant(name = indication["name"], address=loc, image=indication["image"])
+		session.add(restaurant)
+		session.commit()
 
-	# returns the restaurant for the user
-	return jsonify(Restaurant=restaurant.serialize)
+		# returns the restaurant for the user
+		return jsonify(Restaurant=restaurant.serialize)
 
 # Generate methods to call - second endpoint
 
 def getARestaurant(id):
-	print("showing restaurant")
+	restaurant = session.query(Restaurant).filter_by(id=id).one()
+	if not restaurant:
+		print("no restaurant")
 
-def updateRestaurant(id):
-	print("updating restaurant")
+	return jsonify(Restaurant=restaurant.serialize)
+
+def updateRestaurant(id, name, address, image):
+	restaurant = session.query(Restaurant).filter_by(id=id).one()
+	print(restaurant)
+	if name:
+		restaurant.name = name
+	if address:
+		restaurant.address = address
+	if image:
+		restaurant.image = image
+	session.add(restaurant)
+	session.commit()
+	return jsonify(Restaurant=restaurant.serialize)
 
 def deleteRestaurant(id):
-	print("deleting a restaurant")
+	restaurant = session.query(Restaurant).filter_by(id=id).one()
+	session.delete(restaurant)
+	session.commit
+	return "restaurant deleted"
+
 
 if __name__ == '__main__':
 	app.run(host='0.0.0.0', port=5000)

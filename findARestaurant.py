@@ -19,10 +19,13 @@ def getGeocodeLocation(nameOfThePlace):
 
 def findARestaurant(mealType, location):
 	lat, longit = getGeocodeLocation(location)
-	first_place = getAPlace(lat, longit, mealType)[0]
+	try:
+		first_place = getAPlace(lat, longit, mealType)[0]
+	except:
+		return "no restaurant"
 	venue_id = first_place["id"]
 	response = {}
-	response["name"] = first_place["name"]
+	response["name"] = first_place["name"] if first_place["name"] != None else "no name"
 	response["address"] = first_place["location"]["formattedAddress"]
 	response["image"] = getFourSquarePhoto(venue_id)
 	return response
