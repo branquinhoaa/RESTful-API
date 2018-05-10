@@ -16,7 +16,6 @@ try:
 	
 	url = address + '/users'
  	h = Http()
-	#h.add_credentials('TinnyTim', 'Udacity')
  	data = dict(username = "TinnyTim", password = "Udacity")
  	data = json.dumps(data)
  	resp, content = h.request(url,'POST', body = data, headers = {"Content-Type": "application/json"})
@@ -68,8 +67,7 @@ try:
 	h = Http()
 	h.add_credentials("TinnyTim", "Udacity")
 	url = address + '/restaurants'
-	#data = dict(username = "TinnyTim", password = "Udacity")
-	resp, content = h.request(url,'GET')#, urlencode(data))
+	resp, content = h.request(url,'GET')
 	if resp['status'] != '200':
 		raise Exception("Unable to access /restaurants with valid credentials")
 except Exception as err:
